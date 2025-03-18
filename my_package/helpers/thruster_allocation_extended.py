@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # thruster_allocation.py
 import numpy as np
 

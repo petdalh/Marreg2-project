@@ -54,7 +54,7 @@ class JoystickNode(Node):
             u = thruster_allocation_extended(tau_body).tolist()
 
         if u == None:
-            u = np.zeros(5)
+            return np.zeros(5)
 
         return u, heading
 
