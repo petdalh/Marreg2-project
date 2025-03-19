@@ -28,7 +28,8 @@ import rcl_interfaces.msg
 import std_msgs.msg
 import tmr4243_interfaces.msg
 
-from helpers.Luenberger import luenberger
+from helpers.luenberger import luenberger
+from helpers.dead_reckoning import dead_reckoning
 from template_observer.wrap import wrap
 
 from std_msgs.msg import Float64
@@ -44,6 +45,8 @@ class Observer(rclpy.node.Node):
 
         self.subs = {}
         self.pubs = {}
+
+        self.measurement_lost = True
 
         # Subscribers for measured states
         self.subs["tau"] = self.create_subscription(
@@ -134,14 +137,15 @@ class Observer(rclpy.node.Node):
         L2 = np.diag(self.L2_value)
         L3 = np.diag(self.L3_value)
 
-        # Run Luenberger observer
-        eta_hat, nu_hat, bias_hat = luenberger(
-            self.x_hat,  # Previous state estimate
-            self.last_eta,  # Measured eta
-            self.last_tau,  # Measured tau
-            L1, L2, L3
-        )
+        if self.measurement_lost:
+            # Use pure dead-reckoning (no measurement correction)
+            eta_hat, nu_hat, bias_hat = dead_reckoning(self.x_hat, self.last_tau)
 
+            # Use this pseudo-measurement in the observer
+            # eta_hat, nu_hat, bias_hat = luenberger(self.x_hat, eta_hat, self.last_tau, L1, L2, L3)
+        else:
+            # Use full Luenberger observer with measurements
+            eta_hat, nu_hat, bias_hat = luenberger(self.x_hat, self.last_eta, self.last_tau, L1, L2, L3)
         # Store estimated eta for error calculation
         self.eta_hat = eta_hat
 
@@ -173,9 +177,9 @@ class Observer(rclpy.node.Node):
         # Calculate error between estimated and measured eta
         eta_error = np.linalg.norm(self.eta_hat - self.last_eta)  
         msg = Float64()
-        msg.data = float(error)
+        msg.data = float(eta_error)
         self.pubs['observer_error'].publish(msg)
-        self.get_logger().info(f'Observer error: {error}, eta: {self.last_eta}, eta_hat: {self.eta_hat}')
+        self.get_logger().info(f'Observer error: {eta_error}, eta: {self.last_eta}, eta_hat: {self.eta_hat}')
 
 
 def main():

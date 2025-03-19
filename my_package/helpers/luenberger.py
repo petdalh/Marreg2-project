@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
-from template_observer.wrap import wrap
+
+def wrap(yaw):
+    return ((yaw + np.pi) % (2 * np.pi)) - np.pi
 
 def create_R(psi):
     """Create rotation matrix from heading angle."""
