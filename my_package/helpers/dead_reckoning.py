@@ -1,16 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
-
-def wrap(yaw):
-    return ((yaw + np.pi) % (2 * np.pi)) - np.pi
-
-def create_R(psi):
-    """Create rotation matrix from heading angle."""
-    return np.array([
-        [np.cos(psi), -np.sin(psi), 0],
-        [np.sin(psi), np.cos(psi), 0],
-        [0, 0, 1]
-    ])
+from .wrap import wrap
+from .create_R import create_R
 
 def dead_reckoning(
         x_hat_prev: np.ndarray,
