@@ -17,7 +17,7 @@ class JoystickNode(Node):
         # Store the latest values from callbacks
         self.current_eta = np.zeros(3)
         self.latest_axes = None
-        self.Basin = True
+        self.Basin = False
 
         # Subscribers update only internal state
         self.create_subscription(Joy, '/joy', self.joy_callback, 10)
