@@ -14,19 +14,16 @@ class JoystickNode(Node):
         super().__init__('joystick_node')
         self.get_logger().info("My node is running")
         
-        # Store the latest values from callbacks
         self.current_eta = np.zeros(3)
         self.latest_axes = None
         self.Basin = False
 
-        # Subscribers update only internal state
         self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.create_subscription(Float32MultiArray, '/tmr4243/state/eta', self.eta_callback, 10)
         
-        # Publisher for thruster commands
         self.u_publisher = self.create_publisher(Float32MultiArray, '/tmr4243/command/u', 10)
+        self.tau_publisher = self.create_publisher(Float32MultiArray, '/tmr4243/command/tau', 10)
         
-        # Timer to process and publish commands
         self.timer = self.create_timer(0.1, self.timer_callback)
 
     def eta_callback(self, msg: Float32MultiArray):
@@ -36,35 +33,38 @@ class JoystickNode(Node):
         self.latest_axes = msg.axes
 
     def timer_callback(self):
-        self.publish_u()
-
-    def calculate_command_computation(self):
-        # Only process if we have received joystick input
-        if self.latest_axes is None:
+        result = self.calculate_command_computation()
+        if result is None:
             return
-
-        # Process input and compute thruster commands
-        tau_body = handle_controller_input(self.latest_axes)
-        heading = self.current_eta[2] if len(self.current_eta) >= 3 else 0.0
-        if self.Basin == True:
-            R = create_R(heading)
-            tau_basin = np.linalg.inv(R) @ tau_body
-            u = thruster_allocation_extended(tau_basin).tolist()
-        else:
-            u = thruster_allocation_extended(tau_body).tolist()
-
-        if u == None:
-            return np.zeros(5)
-
-        return u, heading
-
-    def publish_u(self):
-        u, heading = self.calculate_command_computation()
-        # Publish commands
+        u, heading, tau = result
+        
         u_message = Float32MultiArray()
         u_message.data = u
         self.u_publisher.publish(u_message)
-        self.get_logger().info(f"Heading: {heading:.2f}, u calculated: {u}")
+        
+        tau_message = Float32MultiArray()
+        tau_message.data = tau.tolist()  
+        self.tau_publisher.publish(tau_message)
+        
+        self.get_logger().info(f"Heading: {heading:.2f}, u: {u}, tau: {tau.tolist()}")
+
+    def calculate_command_computation(self):
+        if self.latest_axes is None:
+            return None
+
+        tau_body = handle_controller_input(self.latest_axes)
+        heading = self.current_eta[2] if len(self.current_eta) >= 3 else 0.0
+        if self.Basin:
+            R = create_R(heading)
+            tau = np.linalg.inv(R) @ tau_body
+        else:
+            tau = tau_body
+
+        u = thruster_allocation_extended(tau)
+        if u is None:
+            return np.zeros(5), heading, tau
+
+        return u, heading, tau
 
 def main(args=None):
     rclpy.init(args=args)

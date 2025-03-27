@@ -100,7 +100,11 @@ def dead_reckoning(x_hat_prev, tau, config=ship_config):
     # Calculate derivatives based on ODM
     eta_dot = R @ nu_hat
     nu_dot = config.M_inv @ (-config.D @ nu_hat + R.T @ bias_hat + tau)
-    b_dot = np.zeros((3, 1))  # Bias is constant
+    # b_dot = np.zeros((3, 1)) # Bias is constant
+
+    # If bias is not constant
+    alpha = 0.1  # Small drift coefficient
+    b_dot = alpha * bias_hat
     
     # Euler integration to update state estimates
     eta_hat_new = eta_hat + eta_dot * config.dt

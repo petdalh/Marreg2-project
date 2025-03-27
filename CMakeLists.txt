@@ -8,6 +8,9 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   my_package/observer_node.py
   my_package/joystick_node.py
+  my_package/guidance_node.py
+  my_package/observer_node.py
+  my_package/thrust_allocation_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

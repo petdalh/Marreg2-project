@@ -3,23 +3,6 @@
 import numpy as np
 
 def thruster_allocation_extended(tau: np.ndarray) -> np.ndarray:
-    """
-    Weighted pseudoinverse thrust allocation with sign-flip logic for 2 VSP thrusters
-    plus a single fixed-direction lateral thruster.
-
-    Parameters
-    ----------
-    tau : np.ndarray
-        3x1 vector [X, Y, N]^T representing surge, sway, and yaw commands.
-
-    Returns
-    -------
-    np.ndarray
-        5x1 vector [u1, u2, u3, alpha1, alpha2], where
-        - u1, u2, u3 are thruster inputs (e.g. in [0,1] or [−1,1]),
-        - alpha1, alpha2 are azimuth angles for thrusters 1 & 2.
-    """
-
     # Thruster positions (x_i, y_i).
     x1, y1 = (-41.5, -7)  
     x2, y2 = (-41.5, 7)   
