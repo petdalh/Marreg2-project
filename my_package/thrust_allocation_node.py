@@ -1,37 +1,36 @@
 #!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 import numpy as np
 from helpers.thruster_allocation_extended import thruster_allocation_extended
 
-class ThrusterAllocationNode(Node):
+class ThrustAllocationNode(Node):
     def __init__(self):
-        super().__init__('thruster_allocation_node')
+        super().__init__('thrust_allocation_node')
+        self.get_logger().info("Thrust Allocation Node is running")
+        
         self.subscription = self.create_subscription(
             Float32MultiArray,
             '/tmr4243/command/tau',
             self.tau_callback,
-            10
-        )
-        self.publisher = self.create_publisher(
-            Float32MultiArray,
-            '/tmr4243/command/u',
-            10
-        )
+            10)
+        self.u_publisher = self.create_publisher(Float32MultiArray, '/tmr4243/command/u', 10)
 
     def tau_callback(self, msg):
-        tau = np.array(msg.data, dtype=np.float32).reshape(3, 1)
+        tau = np.array(msg.data)
         u = thruster_allocation_extended(tau)
-        
-        if u is not None:
-            u_msg = Float32MultiArray()
-            u_msg.data = u.flatten().tolist()
-            self.publisher.publish(u_msg)
+        if u is None:
+            u = np.zeros(5)  # Handle error appropriately
+        u_msg = Float32MultiArray()
+        u_msg.data = u.tolist()
+        self.u_publisher.publish(u_msg)
+        self.get_logger().info(f"Published u: {u}")
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ThrusterAllocationNode()
+    node = ThrustAllocationNode()
     rclpy.spin(node)
     rclpy.shutdown()
 
