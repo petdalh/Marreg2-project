@@ -15,7 +15,9 @@ class JoystickNode(Node):
         
         self.current_eta = np.zeros(3)
         self.latest_axes = None
-        self.Basin = False  # Consider loading this from parameters
+        self.Basin = False
+        self.joystick_active = True  # Add joystick state
+        self.button_was_pressed = False  # For edge detection
 
         self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.create_subscription(Float32MultiArray, '/tmr4243/state/eta', self.eta_callback, 10)
@@ -27,19 +29,42 @@ class JoystickNode(Node):
         self.current_eta = np.array(msg.data)
 
     def joy_callback(self, msg: Joy):
+        # Store axes for processing
         self.latest_axes = msg.axes
+        
+        # Handle button 3 toggle
+        if len(msg.buttons) > 3:
+            button_is_pressed = (msg.buttons[3] == 1)
+            
+            # Detect rising edge
+            if button_is_pressed and not self.button_was_pressed:
+                self.joystick_active = not self.joystick_active
+                status = "ON" if self.joystick_active else "OFF"
+                self.get_logger().info(f"Joystick control toggled {status}")
+                
+            self.button_was_pressed = button_is_pressed
 
     def timer_callback(self):
+        # Exit if joystick is inactive
+        if not self.joystick_active:
+            return
+
         if self.latest_axes is None:
             return
 
         tau, heading = self.calculate_command_computation()
+
+        tau = np.array(tau).reshape(3, 1)
+        
+        # Optional: Add deadzone check
+        if np.allclose(tau, 0):
+            return
         
         tau_message = Float32MultiArray()
-        tau_message.data = tau.tolist()  
+        tau_message.data = tau.flatten().tolist()
         self.tau_publisher.publish(tau_message)
         
-        self.get_logger().info(f"Heading: {heading:.2f}, tau: {tau.tolist()}")
+        self.get_logger().info(f"Heading: {heading:.2f}, tau: {tau.flatten().tolist()}")
 
     def calculate_command_computation(self):
         tau_body = handle_controller_input(self.latest_axes)

@@ -11,6 +11,7 @@ install(PROGRAMS
   my_package/guidance_node.py
   my_package/observer_node.py
   my_package/thrust_allocation_node.py
+  my_package/controller_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
