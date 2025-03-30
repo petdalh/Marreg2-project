@@ -20,7 +20,7 @@ def PD_FF_controller(observer, reference, P_gain: float, D_gain: float) -> np.nd
     e = R_transpose @ (eta_hat - eta_ref)
     
     K_p = np.diag([P_gain, P_gain, P_gain])  
-    K_d = np.diag([D_gain, D_gain, D_gain])
+    K_d = np.diag([D_gain, D_gain, D_gain]) 
     
     tau_pd = -K_p @ e - K_d @ nu_hat
     
@@ -56,8 +56,6 @@ class PID_controller:
         K_p = np.diag([P_gain, P_gain, P_gain])
         K_i = np.diag([I_gain, I_gain, I_gain])
         K_d = np.diag([D_gain, D_gain, D_gain])
-
-        K_p[3][3] *= 100
 
         # Compute control output
         tau_pid = -K_p @ e - K_i @ self.e_integral - K_d @ nu_hat

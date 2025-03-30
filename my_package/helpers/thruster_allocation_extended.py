@@ -55,9 +55,12 @@ def thruster_allocation_extended(tau: np.ndarray) -> np.ndarray:
     u3_star = F3_star / K[2]
 
     # Clamp each thruster input to [0, 1]:
-    u3_cmd = max(-1.0, min(u3_star, 1.0))  # Allow negative for lateral thruster
-    u1_cmd = max(-1.0, min(u1_star, 1.0))   # Keep positive for VSP thrusters
-    u2_cmd = max(-1.0, min(u2_star, 1.0))
+    # u3_cmd = max(-1.0, min(u3_star, 1.0))  # Allow negative for lateral thruster
+    # u1_cmd = max(-1.0, min(u1_star, 1.0))   # Keep positive for VSP thrusters
+    # u2_cmd = max(-1.0, min(u2_star, 1.0))
+    u3_cmd = u1_star # Allow negative for lateral thruster
+    u1_cmd = u2_star   # Keep positive for VSP thrusters
+    u2_cmd = u3_star
 
     # Wrap angles to [-pi, pi], if needed
     def wrap_angle(a):

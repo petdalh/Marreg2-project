@@ -7,6 +7,7 @@ import tmr4243_interfaces.msg
 import numpy as np
 
 from helpers.stationkeeping import stationkeeping
+from helpers.straight_line import straight_line, update_law
 
 
 class Guidance(rclpy.node.Node):

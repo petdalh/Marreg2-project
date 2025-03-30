@@ -38,14 +38,25 @@ class JoystickNode(Node):
             
             # Detect rising edge
             if button_is_pressed and not self.button_was_pressed:
+                # If we're turning off the joystick, publish zero vector first, this fixes weird bug where it keeps commanding same tau
+                # if we turn of the joystick while giving thrust
+                if self.joystick_active:
+                    self.publish_zero_tau()
+                    self.get_logger().info("Publishing zero tau before turning off joystick")
+                
                 self.joystick_active = not self.joystick_active
                 status = "ON" if self.joystick_active else "OFF"
                 self.get_logger().info(f"Joystick control toggled {status}")
                 
             self.button_was_pressed = button_is_pressed
 
+    def publish_zero_tau(self):
+        zero_tau = np.zeros((3, 1))
+        tau_message = Float32MultiArray()
+        tau_message.data = zero_tau.flatten().tolist()
+        self.tau_publisher.publish(tau_message)
+
     def timer_callback(self):
-        # Exit if joystick is inactive
         if not self.joystick_active:
             return
 
@@ -55,10 +66,6 @@ class JoystickNode(Node):
         tau, heading = self.calculate_command_computation()
 
         tau = np.array(tau).reshape(3, 1)
-        
-        # Optional: Add deadzone check
-        if np.allclose(tau, 0):
-            return
         
         tau_message = Float32MultiArray()
         tau_message.data = tau.flatten().tolist()

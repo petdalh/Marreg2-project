@@ -74,7 +74,7 @@ class Controller(rclpy.node.Node):
         if not self.controller_active:
             return
         if self.last_reference is None or self.last_observation is None:
-            self.get_logger().warn("Last reference or last observation is None", throttle_duration_sec=1.0)
+            # self.get_logger().warn("Last reference or last observation is None", throttle_duration_sec=1.0)
             return
 
         if not self.controller_active:
@@ -117,14 +117,14 @@ class Controller(rclpy.node.Node):
 
     def received_reference(self, msg):
         try:
-            self.get_logger().info(f"Received reference message!, message: {msg}")
+            #self.get_logger().info(f"Received reference message!, message: {msg}")
             self.last_reference = msg
         except Exception as e:
             self.get_logger().error(f"Callback error: {e}")
 
     def received_observer(self, msg):
         try:
-            self.get_logger().info(f"Received observer message!, message: {msg}")
+            #self.get_logger().info(f"Received observer message!, message: {msg}")
             self.last_observation = msg
         except Exception as e:
             self.get_logger().error(f"Callback error: {e}")
