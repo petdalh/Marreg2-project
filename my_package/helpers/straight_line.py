@@ -1,55 +1,55 @@
 import numpy as np
 
-# Define global parameters (for example):
-p0 = np.array([5.0, 0.0])
-p1 = np.array([0.0, 0])
-U_ref = 1.0
-psi_ref = None
+# Temporary configurations
+p0 = np.array([0.0, 0.0])
+p1 = np.array([5.0, 0.0])
+psi_d_const = 0.0
+U_ref = 0.5
+mu = 0.1
+eps = 1e-6
 
-# Precompute path vectors:
-pd_s = p1 - p0
-path_length = np.linalg.norm(pd_s)
 # Constant heading if psi_ref not given:
-psi_d_const = psi_ref if psi_ref is not None else np.arctan2(pd_s[1], pd_s[0])
+psi_d_const = 0
 
-def straight_line():
-    """
-    Returns:
-       eta_d   = [x_d, y_d, psi_d]
-       eta_ds  = [x'_d, y'_d, psi'_d]
-       eta_ds2 = [x''_d, y''_d, psi''_d]
-    """
-    # Example path parameter in [0,1]
-    s = 0.5
+def straight_line(s):
 
-    # Position on line
-    pd = (1 - s)*p0 + s*p1
+   # Position on line
+   pd = (1 - s)*p0 + s*p1
+   # Heading
+   psi_d = psi_d_const
 
-    # Heading
-    psi_d = psi_d_const
+   
+   eta_d = np.array([pd[0], pd[1], psi_d])
 
-    # Build outputs
-    eta_d = np.array([pd[0], pd[1], psi_d])
+   # 2) First derivative wrt s
+   pd_s = (p1 - p0)
+   psi_d_s = 0.0
+   eta_ds = np.array([pd_s[0], pd_s[1], psi_d_s], dtype=float)
 
-    # First derivative w.r.t. path parameter s
-    pd_s_   = pd_s
-    psi_d_s = 0.0
-    eta_ds  = np.array([pd_s_[0], pd_s_[1], psi_d_s])
+   # 3) Second derivative is zero for straight line
+   eta_ds2 = np.zeros_like(eta_ds)
 
-    # Second derivative is zero on a straight line
-    pd_s2_   = np.zeros_like(pd_s_)
-    psi_d_s2 = 0.0
-    eta_ds2  = np.array([pd_s2_[0], pd_s2_[1], psi_d_s2])
+   return eta_d, eta_ds, eta_ds2
 
-    return eta_d, eta_ds, eta_ds2
+def update_law(observation, s):
+   # task 4.5 normalized gradient update law
+   if observation.eta == None:
+      eta_hat = np.zeros((3, 1))   
+   else:
+      eta_hat = np.array(observation.eta).reshape(3, 1)
 
-def update_law():
-    """
-    Returns:
-       w, v_s, v_ss
-    """
-    # Example constant rate of change for s
-    w = 0.1
-    v_s = 0.0
-    v_ss = 0.0
-    return w, v_s, v_ss
+   p_hat = eta_hat[:2, 0]  
+   eta_d, eta_ds, eta_ds2 = straight_line(s)
+
+   norm_eta_ds = np.linalg.norm(eta_ds[:2]) + eps
+
+
+   p_d = eta_d[:2]
+   V1_s = -(p1 - p0).T@(p_hat - p_d)
+
+   w = - mu/(norm_eta_ds)* V1_s
+   v_s = U_ref / np.linalg.norm(p1 - p0)
+   v_ss = 0.0
+
+
+   return w, v_s, v_ss

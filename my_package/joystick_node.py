@@ -43,7 +43,6 @@ class JoystickNode(Node):
                 if self.joystick_active:
                     self.publish_zero_tau()
                     self.get_logger().info("Publishing zero tau before turning off joystick")
-                
                 self.joystick_active = not self.joystick_active
                 status = "ON" if self.joystick_active else "OFF"
                 self.get_logger().info(f"Joystick control toggled {status}")

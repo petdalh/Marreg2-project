@@ -9,7 +9,7 @@ import numpy as np
 from std_msgs.msg import Float32MultiArray
 from sensor_msgs.msg import Joy
 
-from helpers.controllers import PID_controller, PD_FF_controller
+from helpers.controllers import PID_controller, PD_FF_controller, backstepping_controller
 
 
 class Controller(rclpy.node.Node):
@@ -29,12 +29,18 @@ class Controller(rclpy.node.Node):
         self.declare_parameter('p_gain', 1.0)
         self.declare_parameter('i_gain', 0.1)
         self.declare_parameter('d_gain', 0.5)
+    
+        self.declare_parameter('k1_gain', 10.0)
+        self.declare_parameter('k2_gain', 10.0)
         
         # Get parameters
         self.task = self.get_parameter('task').value
         self.p_gain = self.get_parameter('p_gain').value
         self.i_gain = self.get_parameter('i_gain').value
         self.d_gain = self.get_parameter('d_gain').value
+        # Backstepping gains
+        self.k1_gain = self.get_parameter('k1_gain').value
+        self.k2_gain = self.get_parameter('k2_gain').value
 
         self.pubs = {}
         self.subs = {}
