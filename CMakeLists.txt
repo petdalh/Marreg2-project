@@ -20,7 +20,7 @@ install(DIRECTORY
 )
 
 install(
-  DIRECTORY my_package/launch/
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/launch
 )
 

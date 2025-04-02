@@ -20,7 +20,7 @@ def PD_FF_controller(observer, reference, P_gain: float, D_gain: float) -> np.nd
     
     e = R_transpose @ (eta_hat - eta_ref)
     
-    K_p = np.diag([P_gain, P_gain, P_gain])  
+    K_p = np.diag([P_gain+10, P_gain+10, P_gain+800])  
     K_d = np.diag([D_gain, D_gain, D_gain]) 
     
     tau_pd = -K_p @ e - K_d @ nu_hat

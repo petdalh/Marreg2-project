@@ -31,4 +31,10 @@ def generate_launch_description():
             output='screen',
             parameters=[{'task': 'TASK_STATIONKEEPING'}]
         )
+        Node(
+            package='my_package',
+            executable='joystick_node.py',        
+            name='joystick_node',
+            output='screen'
+        )
     ])

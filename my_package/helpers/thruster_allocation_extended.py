@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# thruster_allocation.py
 import numpy as np
+
 
 def thruster_allocation_extended(tau: np.ndarray) -> np.ndarray:
     # Thruster positions (x_i, y_i).
