@@ -9,7 +9,6 @@ install(PROGRAMS
   my_package/observer_node.py
   my_package/joystick_node.py
   my_package/guidance_node.py
-  my_package/observer_node.py
   my_package/thrust_allocation_node.py
   my_package/controller_node.py
   DESTINATION lib/${PROJECT_NAME}
@@ -18,6 +17,11 @@ install(PROGRAMS
 install(DIRECTORY
   my_package/helpers
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/launch
 )
 
 ament_package()

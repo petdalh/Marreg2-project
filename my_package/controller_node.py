@@ -9,7 +9,7 @@ import numpy as np
 from std_msgs.msg import Float32MultiArray
 from sensor_msgs.msg import Joy
 
-from helpers.controllers import PID_controller, PD_FF_controller
+from helpers.controllers import PID_controller, PD_FF_controller, backstepping_controller
 
 
 class Controller(rclpy.node.Node):
@@ -29,12 +29,18 @@ class Controller(rclpy.node.Node):
         self.declare_parameter('p_gain', 1.0)
         self.declare_parameter('i_gain', 0.1)
         self.declare_parameter('d_gain', 0.5)
+    
+        self.declare_parameter('k1_gain', 10.0)
+        self.declare_parameter('k2_gain', 10.0)
         
         # Get parameters
         self.task = self.get_parameter('task').value
         self.p_gain = self.get_parameter('p_gain').value
         self.i_gain = self.get_parameter('i_gain').value
         self.d_gain = self.get_parameter('d_gain').value
+        # Backstepping gains
+        self.k1_gain = self.get_parameter('k1_gain').value
+        self.k2_gain = self.get_parameter('k2_gain').value
 
         self.pubs = {}
         self.subs = {}
@@ -74,7 +80,7 @@ class Controller(rclpy.node.Node):
         if not self.controller_active:
             return
         if self.last_reference is None or self.last_observation is None:
-            self.get_logger().warn("Last reference or last observation is None", throttle_duration_sec=1.0)
+            # self.get_logger().warn("Last reference or last observation is None", throttle_duration_sec=1.0)
             return
 
         if not self.controller_active:
@@ -117,14 +123,14 @@ class Controller(rclpy.node.Node):
 
     def received_reference(self, msg):
         try:
-            self.get_logger().info(f"Received reference message!, message: {msg}")
+            #self.get_logger().info(f"Received reference message!, message: {msg}")
             self.last_reference = msg
         except Exception as e:
             self.get_logger().error(f"Callback error: {e}")
 
     def received_observer(self, msg):
         try:
-            self.get_logger().info(f"Received observer message!, message: {msg}")
+            #self.get_logger().info(f"Received observer message!, message: {msg}")
             self.last_observation = msg
         except Exception as e:
             self.get_logger().error(f"Callback error: {e}")

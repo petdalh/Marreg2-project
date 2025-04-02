@@ -22,7 +22,7 @@ class ThrustAllocationNode(Node):
         tau = np.array(msg.data)
         u = thruster_allocation_extended(tau)
         if u is None:
-            u = np.zeros(5)  # Handle error appropriately
+            u = np.zeros(5)  
         u_msg = Float32MultiArray()
         u_msg.data = u.tolist()
         self.u_publisher.publish(u_msg)
