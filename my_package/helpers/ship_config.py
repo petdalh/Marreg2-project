@@ -2,9 +2,7 @@
 
 import numpy as np
 
-class ShipConfig:
-    """Configuration object holding system parameters and utility functions"""
-    
+class ShipConfig:    
     def __init__(self):
         # System parameters
         self.M = np.array([[16.0, 0.0, 0.0], [0.0, 24.0, 0.53], [0.0, 0.53, 2.8]])
