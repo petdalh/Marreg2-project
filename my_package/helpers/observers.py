@@ -6,7 +6,6 @@ from .ship_config import ship_config
 
 
 def extract_states(x_hat_prev):
-    """Extract state components from the state vector"""
     eta_hat = x_hat_prev[0:3].reshape(3, 1)
     nu_hat = x_hat_prev[3:6].reshape(3, 1)
     bias_hat = x_hat_prev[6:9].reshape(3, 1)
@@ -14,15 +13,11 @@ def extract_states(x_hat_prev):
 
 
 def create_rotation_matrix(eta_hat):
-    """Create rotation matrix from heading"""
     psi_hat = wrap(eta_hat[2, 0])
     return create_R(psi_hat)
 
 
 def luenberger(x_hat_prev, eta, tau, L1, L2, L3, config=ship_config):
-    """
-    Update state estimate using Luenberger observer with configuration object
-    """
     # Extract previous state estimates
     eta_hat, nu_hat, bias_hat = extract_states(x_hat_prev)
     
@@ -32,28 +27,24 @@ def luenberger(x_hat_prev, eta, tau, L1, L2, L3, config=ship_config):
     # y_tilde = y - ŷ = y - η̂
     y_tilde = eta - eta_hat
         
-    # A matrix - system dynamics
     A = np.block([
         [np.zeros((3, 3)), R, np.zeros((3, 3))],
         [np.zeros((3, 3)), -config.M_inv @ config.D, config.M_inv],
         [np.zeros((3, 3)), np.zeros((3, 3)), -config.T_b_inv]
     ])
     
-    # B matrix - control input mapping
     B = np.vstack([
         np.zeros((3, 3)),
         config.M_inv,
         np.zeros((3, 3))
     ])
     
-    # C matrix - measurement feedback
     C = np.vstack([
         L1,
         config.M_inv @ L2 @ R.T,
         L3 @ R.T
     ])
     
-    # Stack the state vector
     x = np.vstack([eta_hat, nu_hat, bias_hat])
     
     # Calculate state derivatives: ẋ = Ax + Bτ + Cỹ
@@ -62,7 +53,6 @@ def luenberger(x_hat_prev, eta, tau, L1, L2, L3, config=ship_config):
     # Euler integration to update state estimates
     x_new = x + x_dot * config.dt
     
-    # Extract updated state estimates
     eta_hat_new = x_new[0:3]
     nu_hat_new = x_new[3:6]
     bias_hat_new = x_new[6:9]
@@ -71,9 +61,6 @@ def luenberger(x_hat_prev, eta, tau, L1, L2, L3, config=ship_config):
 
 
 def dead_reckoning(x_hat_prev, tau, config=ship_config):
-    """
-    Update state estimate using dead reckoning with configuration object
-    """
     # Extract previous state estimates
     eta_hat, nu_hat, bias_hat = extract_states(x_hat_prev)
     
@@ -86,7 +73,7 @@ def dead_reckoning(x_hat_prev, tau, config=ship_config):
     # b_dot = np.zeros((3, 1)) # Bias is constant
 
     # If bias is not constant
-    alpha = 0.1  # Small drift coefficient
+    alpha = 0.1 
     b_dot = alpha * bias_hat
     
     # Euler integration to update state estimates

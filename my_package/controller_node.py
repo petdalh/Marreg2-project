@@ -31,7 +31,7 @@ class Controller(rclpy.node.Node):
         self.declare_parameter('d_gain', 0.5)
     
         self.declare_parameter('k1_gain', 10.0)
-        self.declare_parameter('k2_gain', 10.0)
+        self.declare_parameter('k2_gain', 11.0)
         
         # Get parameters
         self.task = self.get_parameter('task').value
@@ -104,6 +104,7 @@ class Controller(rclpy.node.Node):
                     self.d_gain,
                 )
             elif Controller.TASK_BACKSTEPPING_CONTROLLER in self.task:
+                self.get_logger().info(f"Reference is: {self.last_reference}")
                 tau = backstepping_controller(
                     self.last_observation,
                     self.last_reference,

@@ -2,9 +2,9 @@
 import numpy as np
 
 def handle_controller_input(axes):
-    max_surge = 1.0
-    max_sway = 1.0
-    max_yaw = 1.0
+    max_surge = 2.0
+    max_sway = 2.0
+    max_yaw = 100.0
 
     if axes[2] < 1:
         tau_cmd = np.array([
