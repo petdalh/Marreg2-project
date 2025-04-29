@@ -25,13 +25,13 @@ class Controller(rclpy.node.Node):
         self.PID_controller = PID_controller()
 
         # Declare parameters with default values
-        self.declare_parameter('task', self.TASK_PD_FF_CONTROLLER)
+        self.declare_parameter('task', self.TASK_BACKSTEPPING_CONTROLLER)
         self.declare_parameter('p_gain', 1.0)
         self.declare_parameter('i_gain', 0.1)
         self.declare_parameter('d_gain', 0.5)
     
-        self.declare_parameter('k1_gain', 10.0)
-        self.declare_parameter('k2_gain', 11.0)
+        self.declare_parameter('k1_gain', 1.0)
+        self.declare_parameter('k2_gain', 1.0)
         
         # Get parameters
         self.task = self.get_parameter('task').value
@@ -67,10 +67,10 @@ class Controller(rclpy.node.Node):
         self.controller_active = True
         self.button_was_pressed_controller = False
 
-        timer_period = 0.1 # seconds
+        timer_period = 0.1 
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        controller_period = 0.1 # seconds
+        controller_period = 0.1 
         self.controller_timer = self.create_timer(controller_period, self.controller_callback)
 
     def timer_callback(self):

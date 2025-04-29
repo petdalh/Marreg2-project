@@ -6,19 +6,23 @@ def handle_controller_input(axes):
     max_sway = 2.0
     max_yaw = 100.0
 
-    if axes[2] < 1:
+    # Map trigger values from [1, -1] to [0, 1]
+    left_trigger = (1 - axes[5]) / 2
+    right_trigger = (1 - axes[2]) / 2
+    
+    if left_trigger > 0:  
         tau_cmd = np.array([
             max_surge * axes[1],
             max_sway * axes[0],
-            -max_yaw * axes[2] 
+            -max_yaw * left_trigger  
         ])
-    elif axes[5] < 1:
+    elif right_trigger > 0:  
         tau_cmd = np.array([
             max_surge * axes[1],
             max_sway * axes[0],
-            max_yaw * axes[5] 
+            max_yaw * right_trigger  
         ])
-    else:
+    else:  
         tau_cmd = np.array([
             max_surge * axes[1],
             max_sway * axes[0],
