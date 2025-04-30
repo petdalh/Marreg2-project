@@ -9,6 +9,7 @@ class ShipConfig:
         self.D = np.array([[0.66, 0.0, 0.0], [0.0, 1.3, 2.8], [0.0, 0.0, 1.9]])
         self.T_b = np.diag([124, 124, 124])
         self.dt = 0.1
+        self.S = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]])
         
         # Precomputed values
         self.M_inv = np.linalg.inv(self.M)
